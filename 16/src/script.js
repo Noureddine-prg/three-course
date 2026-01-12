@@ -2,7 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Timer } from "three/addons/misc/Timer.js";
 import GUI from "lil-gui";
-import { time } from "three/tsl";
+import { color, time } from "three/tsl";
+import { c } from "docker/src/languages";
 
 // 1 unit is 1 meter
 
@@ -18,21 +19,18 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-/**
- * House
- */
-
 // Floor
 const floor = new THREE.Mesh(
   new THREE.PlaneGeometry(40, 40),
   new THREE.MeshStandardMaterial()
 );
 
+// Windmill tower group
+const windmillTowerGroup = new THREE.Group();
+scene.add(windmillTowerGroup);
+
 floor.rotation.x = Math.PI * -0.5;
 scene.add(floor);
-
-const houseGroup = new THREE.Group();
-scene.add(houseGroup);
 
 // Walls
 const walls = new THREE.Mesh(
@@ -42,7 +40,7 @@ const walls = new THREE.Mesh(
 
 walls.position.y = 5;
 
-houseGroup.add(walls);
+windmillTowerGroup.add(walls);
 
 // roof
 const roof = new THREE.Mesh(
@@ -52,26 +50,40 @@ const roof = new THREE.Mesh(
 
 roof.position.y = 15;
 
-houseGroup.add(roof);
+windmillTowerGroup.add(roof);
 
+// roof - indent
 const roofIndent = new THREE.Mesh(
   new THREE.BoxGeometry(2, 4, 2),
-  new THREE.MeshStandardMaterial({ color: 0x552200 })
+  new THREE.MeshStandardMaterial()
 );
 roofIndent.position.z = 3;
 roofIndent.position.y = 12.01;
 
-houseGroup.add(roofIndent);
+windmillTowerGroup.add(roofIndent);
+
+// Windmill Blade Poles
+
+const bladeGroup = new THREE.Group();
+windmillTowerGroup.add(bladeGroup);
 
 const windmillBladePoles = {
   rotationSpeed: 0.5,
   positionY: 12,
   positionZ: 4.25,
+  color: 0x000000,
+};
+
+const windMillBlade = {
+  width: 1.5,
+  height: 5,
+  rows: 10,
+  cols: 5,
 };
 
 const windmillBladePole1 = new THREE.Mesh(
   new THREE.BoxGeometry(0.3, 10, 0.5),
-  new THREE.MeshStandardMaterial({ color: 0x888888 })
+  new THREE.MeshStandardMaterial({ color: windmillBladePoles.color })
 );
 
 windmillBladePole1.position.y = windmillBladePoles.positionY;
@@ -79,17 +91,120 @@ windmillBladePole1.position.z = windmillBladePoles.positionZ;
 
 windmillBladePole1.rotation.z = Math.PI / 4;
 
-const windmillBladePole2 = new THREE.Mesh(
-  new THREE.BoxGeometry(0.3, 10, 0.5),
-  new THREE.MeshStandardMaterial({ color: 0x888888 })
-);
+const windmillBladePole2 = windmillBladePole1.clone();
 
 windmillBladePole2.position.y = windmillBladePoles.positionY;
 windmillBladePole2.position.z = windmillBladePoles.positionZ;
 
 windmillBladePole2.rotation.z = -Math.PI / 4;
 
-houseGroup.add(windmillBladePole1, windmillBladePole2);
+bladeGroup.add(windmillBladePole1, windmillBladePole2);
+
+//Windmill blades
+const createLatice = (width, height, rows, cols, material) => {
+  const latticeGroup = new THREE.Group();
+
+  // Horizontal Bars - from bottom edge to top edge
+  for (let i = 0; i <= rows; i++) {
+    const slat = new THREE.Mesh(
+      new THREE.BoxGeometry(width, 0.05, 0.05),
+      material
+    );
+    slat.position.y = (i / rows) * height - height / 2;
+    latticeGroup.add(slat);
+  }
+
+  // Vertical Bars - from left edge to right edge
+  for (let i = 0; i <= cols; i++) {
+    const slat = new THREE.Mesh(
+      new THREE.BoxGeometry(0.05, height, 0.05),
+      material
+    );
+    slat.position.x = (i / cols) * width - width / 2;
+    latticeGroup.add(slat);
+  }
+
+  return latticeGroup;
+};
+
+const latticeMaterial = new THREE.MeshStandardMaterial({
+  color: 0x8b4513,
+});
+
+// Position settings
+const armOffset = 2.5; // distance from center along the arm
+const poleY = windmillBladePoles.positionY;
+const poleZ = windmillBladePoles.positionZ + 0.5; // slightly in front of poles
+
+// For 45 degree rotation
+const cos45 = Math.cos(Math.PI / 4);
+const sin45 = Math.sin(Math.PI / 4);
+
+// All 4 lattices offset to the same side of their arm (perpendicular offset)
+const perpOffset = 0.7; // perpendicular to arm direction
+
+// Lattice for upper-right arm (pole1)
+const lattice1 = createLatice(
+  windMillBlade.width,
+  windMillBlade.height,
+  windMillBlade.rows,
+  windMillBlade.cols,
+  latticeMaterial
+);
+lattice1.rotation.z = -Math.PI / 4;
+lattice1.position.set(
+  armOffset * cos45 + perpOffset * sin45,
+  poleY + armOffset * sin45,
+  poleZ
+);
+
+// Lattice for lower-left arm (pole1)
+const lattice2 = createLatice(
+  windMillBlade.width,
+  windMillBlade.height,
+  windMillBlade.rows,
+  windMillBlade.cols,
+  latticeMaterial
+);
+lattice2.rotation.z = -Math.PI / 4;
+lattice2.position.set(
+  -armOffset * cos45 + perpOffset * sin45,
+  poleY - armOffset * sin45,
+  poleZ
+);
+
+// Lattice for upper-left arm (pole2)
+const lattice3 = createLatice(
+  windMillBlade.width,
+  windMillBlade.height,
+  windMillBlade.rows,
+  windMillBlade.cols,
+  latticeMaterial
+);
+lattice3.rotation.z = Math.PI / 4;
+lattice3.position.set(
+  -armOffset * cos45 - perpOffset * sin45,
+  poleY + armOffset * sin45,
+  poleZ
+);
+
+// Lattice for lower-right arm (pole2)
+const lattice4 = createLatice(
+  windMillBlade.width,
+  windMillBlade.height,
+  windMillBlade.rows,
+  windMillBlade.cols,
+  latticeMaterial
+);
+lattice4.rotation.z = Math.PI / 4;
+lattice4.position.set(
+  armOffset * cos45 - perpOffset * sin45,
+  poleY - armOffset * sin45,
+  poleZ
+);
+
+bladeGroup.add(lattice1, lattice2, lattice3, lattice4);
+
 /**
  * Lights
  */
