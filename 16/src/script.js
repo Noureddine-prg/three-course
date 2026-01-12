@@ -2,8 +2,6 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Timer } from "three/addons/misc/Timer.js";
 import GUI from "lil-gui";
-import { color, time } from "three/tsl";
-import { c } from "docker/src/languages";
 
 // 1 unit is 1 meter
 
@@ -65,6 +63,8 @@ windmillTowerGroup.add(roofIndent);
 // Windmill Blade Poles
 
 const bladeGroup = new THREE.Group();
+bladeGroup.position.y = 12;
+bladeGroup.position.z = 4.25;
 windmillTowerGroup.add(bladeGroup);
 
 const windmillBladePoles = {
@@ -76,26 +76,18 @@ const windmillBladePoles = {
 
 const windMillBlade = {
   width: 1.5,
-  height: 5,
-  rows: 10,
-  cols: 5,
+  height: 5.5,
+  rows: 11,
+  cols: 11,
 };
 
 const windmillBladePole1 = new THREE.Mesh(
   new THREE.BoxGeometry(0.3, 10, 0.5),
   new THREE.MeshStandardMaterial({ color: windmillBladePoles.color })
 );
-
-windmillBladePole1.position.y = windmillBladePoles.positionY;
-windmillBladePole1.position.z = windmillBladePoles.positionZ;
-
 windmillBladePole1.rotation.z = Math.PI / 4;
 
 const windmillBladePole2 = windmillBladePole1.clone();
-
-windmillBladePole2.position.y = windmillBladePoles.positionY;
-windmillBladePole2.position.z = windmillBladePoles.positionZ;
-
 windmillBladePole2.rotation.z = -Math.PI / 4;
 
 bladeGroup.add(windmillBladePole1, windmillBladePole2);
@@ -131,17 +123,16 @@ const latticeMaterial = new THREE.MeshStandardMaterial({
   color: 0x8b4513,
 });
 
-// Position settings
-const armOffset = 2.5; // distance from center along the arm
-const poleY = windmillBladePoles.positionY;
-const poleZ = windmillBladePoles.positionZ + 0.5; // slightly in front of poles
+// Position settings (relative to bladeGroup center)
+const armOffset = 2.75; // distance from center along the arm
+const poleY = 0; // relative to group
+const poleZ = 0.5; // slightly in front of poles
 
 // For 45 degree rotation
 const cos45 = Math.cos(Math.PI / 4);
 const sin45 = Math.sin(Math.PI / 4);
 
-// All 4 lattices offset to the same side of their arm (perpendicular offset)
-const perpOffset = 0.7; // perpendicular to arm direction
+const perpOffset = 0.35; // perpendicular to arm direction
 
 // Lattice for upper-right arm (pole1)
 const lattice1 = createLatice(
@@ -276,7 +267,10 @@ const tick = () => {
   // Timer
   timer.update();
   const elapsedTime = timer.getElapsed();
+  const deltaTime = timer.getDelta();
 
+  // Update windmill blade rotation
+  bladeGroup.rotation.z += windmillBladePoles.rotationSpeed * deltaTime * 2;
   // Update controls
   controls.update();
 
