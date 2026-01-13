@@ -18,10 +18,59 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
+// Textures
+const textureLoader = new THREE.TextureLoader();
+
 // Floor
+const floorAlphaTexture = textureLoader.load("./floor/alpha.jpg");
+const floorColorTexture = textureLoader.load(
+  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_diff_1k.jpg"
+);
+const floorARMTexture = textureLoader.load(
+  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_arm_1k.jpg"
+);
+
+const floorNormalTexture = textureLoader.load(
+  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_nor_gl_1k.jpg"
+);
+
+const floorDisplacementTexture = textureLoader.load(
+  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_disp_1k.jpg"
+);
+
+floorColorTexture.colorSpace = THREE.SRGBColorSpace;
+
+floorColorTexture.repeat.set(40, 40);
+floorColorTexture.wrapS = THREE.RepeatWrapping;
+floorColorTexture.wrapT = THREE.RepeatWrapping;
+
+floorARMTexture.repeat.set(40, 40);
+floorARMTexture.wrapS = THREE.RepeatWrapping;
+floorARMTexture.wrapT = THREE.RepeatWrapping;
+
+floorNormalTexture.repeat.set(40, 40);
+floorNormalTexture.wrapS = THREE.RepeatWrapping;
+floorNormalTexture.wrapT = THREE.RepeatWrapping;
+
+floorDisplacementTexture.repeat.set(40, 40);
+floorDisplacementTexture.wrapS = THREE.RepeatWrapping;
+floorDisplacementTexture.wrapT = THREE.RepeatWrapping;
+
+// Scene Floor Geometry
 const floor = new THREE.Mesh(
-  new THREE.PlaneGeometry(40, 40),
-  new THREE.MeshStandardMaterial()
+  new THREE.PlaneGeometry(40, 40, 100, 100),
+  new THREE.MeshStandardMaterial({
+    alphaMap: floorAlphaTexture,
+    transparent: true,
+    map: floorColorTexture,
+    aoMap: floorARMTexture,
+    roughnessMap: floorARMTexture,
+    metalnessMap: floorARMTexture,
+    normalMap: floorNormalTexture,
+    displacementMap: floorDisplacementTexture,
+    displacementScale: 0.3,
+    displacementBias: -0.2,
+  })
 );
 
 // Windmill tower group
@@ -32,9 +81,39 @@ floor.rotation.x = Math.PI * -0.5;
 scene.add(floor);
 
 // Walls
+const wallColorTexture = textureLoader.load(
+  "./wall/castle_brick_broken_06_1k/castle_brick_broken_06_diff_1k.jpg"
+);
+const wallARMTexture = textureLoader.load(
+  "./wall/castle_brick_broken_06_1k/castle_brick_broken_06_arm_1k.jpg"
+);
+const wallNormalTexture = textureLoader.load(
+  "./wall/castle_brick_broken_06_1k/castle_brick_broken_06_nor_gl_1k.jpg"
+);
+
+wallColorTexture.colorSpace = THREE.SRGBColorSpace;
+
+wallColorTexture.repeat.set(4, 4);
+wallColorTexture.wrapS = THREE.RepeatWrapping;
+wallColorTexture.wrapT = THREE.RepeatWrapping;
+
+wallARMTexture.repeat.set(4, 4);
+wallARMTexture.wrapS = THREE.RepeatWrapping;
+wallARMTexture.wrapT = THREE.RepeatWrapping;
+
+wallNormalTexture.repeat.set(4, 4);
+wallNormalTexture.wrapS = THREE.RepeatWrapping;
+wallNormalTexture.wrapT = THREE.RepeatWrapping;
+
 const walls = new THREE.Mesh(
   new THREE.CylinderGeometry(3, 3, 10),
-  new THREE.MeshStandardMaterial()
+  new THREE.MeshStandardMaterial({
+    map: wallColorTexture,
+    aoMap: wallARMTexture,
+    roughnessMap: wallARMTexture,
+    metalnessMap: wallARMTexture,
+    normalMap: wallNormalTexture,
+  })
 );
 
 walls.position.y = 5;
@@ -53,9 +132,40 @@ door.position.y = 1;
 windmillTowerGroup.add(door);
 
 // Roof
+
+const roofColorTexture = textureLoader.load(
+  "./roof/roof_slates_02_1k/roof_slates_02_diff_1k.jpg"
+);
+const roofARMTexture = textureLoader.load(
+  "./roof/roof_slates_02_1k/roof_slates_02_arm_1k.jpg"
+);
+const roofNormalTexture = textureLoader.load(
+  "./roof/roof_slates_02_1k/roof_slates_02_nor_gl_1k.jpg"
+);
+
+roofColorTexture.colorSpace = THREE.SRGBColorSpace;
+
+roofColorTexture.repeat.set(4, 4);
+roofColorTexture.wrapS = THREE.RepeatWrapping;
+roofColorTexture.wrapT = THREE.RepeatWrapping;
+
+roofARMTexture.repeat.set(4, 4);
+roofARMTexture.wrapS = THREE.RepeatWrapping;
+roofARMTexture.wrapT = THREE.RepeatWrapping;
+
+roofNormalTexture.repeat.set(4, 4);
+roofNormalTexture.wrapS = THREE.RepeatWrapping;
+roofNormalTexture.wrapT = THREE.RepeatWrapping;
+
 const roof = new THREE.Mesh(
   new THREE.ConeGeometry(4, 10, 8, 1),
-  new THREE.MeshStandardMaterial()
+  new THREE.MeshStandardMaterial({
+    map: roofColorTexture,
+    aoMap: roofARMTexture,
+    roughnessMap: roofARMTexture,
+    metalnessMap: roofARMTexture,
+    normalMap: roofNormalTexture,
+  })
 );
 
 roof.position.y = 15;
@@ -65,7 +175,13 @@ windmillTowerGroup.add(roof);
 // roof - indent
 const roofIndent = new THREE.Mesh(
   new THREE.BoxGeometry(2, 4, 2),
-  new THREE.MeshStandardMaterial()
+  new THREE.MeshStandardMaterial({
+    map: roofColorTexture,
+    aoMap: roofARMTexture,
+    roughnessMap: roofARMTexture,
+    metalnessMap: roofARMTexture,
+    normalMap: roofNormalTexture,
+  })
 );
 roofIndent.position.z = 3;
 roofIndent.position.y = 12.01;
@@ -342,6 +458,32 @@ for (const pos of scatteredPositions) {
 
 pathTrees.forEach((tree) => scene.add(tree));
 scatteredTrees.forEach((tree) => scene.add(tree));
+
+// graves
+const graveGeometry = new THREE.BoxGeometry(0.6, 0.8, 0.2);
+const graveMaterial = new THREE.MeshStandardMaterial();
+
+const graves = new THREE.Group();
+
+for (let i = 0; i < 150; i++) {
+  //position
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 7 + Math.random() * 13;
+  const x = Math.sin(angle) * radius;
+  const z = Math.cos(angle) * radius;
+
+  const grave = new THREE.Mesh(graveGeometry, graveMaterial);
+  grave.position.x = x;
+  grave.position.y = Math.random() * 0.5;
+  grave.position.z = z;
+  grave.rotation.x = (Math.random() - 0.5) * 0.4;
+  grave.rotation.y = (Math.random() - 0.5) * 0.4;
+  grave.rotation.z = (Math.random() - 0.5) * 0.4;
+
+  graves.add(grave);
+}
+
+scene.add(graves);
 
 /**
  * Lights
