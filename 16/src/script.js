@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Timer } from "three/addons/misc/Timer.js";
 import GUI from "lil-gui";
+import { trunc } from "three/tsl";
 
 // 1 unit is 1 meter
 
@@ -40,7 +41,18 @@ walls.position.y = 5;
 
 windmillTowerGroup.add(walls);
 
-// roof
+// Door
+const door = new THREE.Mesh(
+  new THREE.PlaneGeometry(2, 3),
+  new THREE.MeshStandardMaterial({ color: 0x654321 })
+);
+
+door.position.z = 3.01;
+door.position.y = 1;
+
+windmillTowerGroup.add(door);
+
+// Roof
 const roof = new THREE.Mesh(
   new THREE.ConeGeometry(4, 10, 8, 1),
   new THREE.MeshStandardMaterial()
@@ -60,7 +72,7 @@ roofIndent.position.y = 12.01;
 
 windmillTowerGroup.add(roofIndent);
 
-// Windmill Blade Poles
+// Windmill Blade Poles and blade
 
 const bladeGroup = new THREE.Group();
 bladeGroup.position.y = 12;
@@ -124,11 +136,10 @@ const latticeMaterial = new THREE.MeshStandardMaterial({
 });
 
 // Position settings (relative to bladeGroup center)
-const armOffset = 2.75; // distance from center along the arm
-const poleY = 0; // relative to group
-const poleZ = 0.5; // slightly in front of poles
+const armOffset = 2.75;
+const poleY = 0;
+const poleZ = 0.5;
 
-// For 45 degree rotation
 const cos45 = Math.cos(Math.PI / 4);
 const sin45 = Math.sin(Math.PI / 4);
 
@@ -195,6 +206,142 @@ lattice4.position.set(
 );
 
 bladeGroup.add(lattice1, lattice2, lattice3, lattice4);
+
+// Bushes
+const bushGeomtry = new THREE.SphereGeometry(1, 16, 16);
+const bushMaterial = new THREE.MeshStandardMaterial();
+
+const bush1 = new THREE.Mesh(bushGeomtry, bushMaterial);
+bush1.scale.setScalar(0.5);
+bush1.position.set(1.4, 0.1, 3);
+
+const bush2 = new THREE.Mesh(bushGeomtry, bushMaterial);
+bush2.scale.setScalar(0.75);
+bush2.position.set(2, 0.1, 3);
+
+const bush3 = new THREE.Mesh(bushGeomtry, bushMaterial);
+bush3.scale.setScalar(0.6);
+bush3.position.set(2, 0.1, 3.5);
+
+const bush4 = new THREE.Mesh(bushGeomtry, bushMaterial);
+bush4.scale.setScalar(0.4);
+bush4.position.set(-1.4, 0.1, 3);
+
+const bush5 = new THREE.Mesh(bushGeomtry, bushMaterial);
+bush5.scale.setScalar(0.55);
+bush5.position.set(-2, 0.1, 3);
+
+const bush6 = new THREE.Mesh(bushGeomtry, bushMaterial);
+bush6.scale.setScalar(0.6);
+bush6.position.set(-2, 0.1, 2.5);
+
+scene.add(bush1, bush2, bush3, bush4, bush5, bush6);
+
+// Trees
+const createTree = (x, z, trunkHeight, trunkRadius) => {
+  const tree = new THREE.Group();
+
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(trunkRadius * 0.7, trunkRadius, trunkHeight),
+    new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+  );
+
+  trunk.position.y = trunkHeight / 2;
+
+  const foliage = new THREE.Mesh(
+    new THREE.ConeGeometry(trunkRadius * 4, trunkHeight * 1.5, 8),
+    new THREE.MeshStandardMaterial({ color: 0x228b22 })
+  );
+
+  foliage.position.y = trunkHeight + (trunkHeight * 1.5) / 2 - 0.5;
+
+  tree.add(trunk, foliage);
+  tree.position.set(x, 0, z);
+  return tree;
+};
+
+// Path trees
+const pathTrees = [];
+const pathStartZ = 5;
+const pathEndZ = 19;
+const pathSpacing = 2.5;
+const pathSideOffset = 3.5;
+
+for (let z = pathStartZ; z <= pathEndZ; z += pathSpacing) {
+  const xJitter = (Math.random() - 0.5) * 0.5;
+  const zJitter = (Math.random() - 0.5) * 0.5;
+  const heightVariation = 2.5 + Math.random() * 1.5;
+  const radiusVariation = 0.2 + Math.random() * 0.1;
+
+  // Left side
+  pathTrees.push(
+    createTree(
+      -pathSideOffset + xJitter,
+      z + zJitter,
+      heightVariation,
+      radiusVariation
+    )
+  );
+  // Right side
+  pathTrees.push(
+    createTree(
+      pathSideOffset + xJitter,
+      z + zJitter,
+      heightVariation,
+      radiusVariation
+    )
+  );
+}
+
+// Scattered trees around the platform (avoiding path and windmill)
+const scatteredTrees = [];
+const scatteredPositions = [
+  // Back area (behind windmill)
+  { x: -8, z: -12 },
+  { x: -12, z: -8 },
+  { x: -15, z: -14 },
+  { x: 10, z: -10 },
+  { x: 14, z: -6 },
+  { x: 8, z: -16 },
+  { x: -5, z: -18 },
+  { x: 3, z: -14 },
+  { x: -10, z: -4 },
+
+  // Left side (away from path)
+  { x: -10, z: 8 },
+  { x: -14, z: 12 },
+  { x: -12, z: 4 },
+  { x: -16, z: 16 },
+  { x: -8, z: 18 },
+  { x: -18, z: 8 },
+
+  // Right side (away from path)
+  { x: 10, z: 6 },
+  { x: 14, z: 10 },
+  { x: 12, z: 16 },
+  { x: 16, z: 4 },
+  { x: 18, z: 14 },
+  { x: 8, z: 12 },
+
+  // Far corners
+  { x: -17, z: -17 },
+  { x: 17, z: -17 },
+  { x: -17, z: 17 },
+  { x: 17, z: 17 },
+  { x: -14, z: -10 },
+  { x: 15, z: -12 },
+];
+
+for (const pos of scatteredPositions) {
+  const heightVariation = 2 + Math.random() * 2.5;
+  const radiusVariation = 0.18 + Math.random() * 0.15;
+  scatteredTrees.push(
+    createTree(pos.x, pos.z, heightVariation, radiusVariation)
+  );
+}
+
+pathTrees.forEach((tree) => scene.add(tree));
+scatteredTrees.forEach((tree) => scene.add(tree));
 
 /**
  * Lights
