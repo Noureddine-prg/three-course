@@ -121,9 +121,30 @@ walls.position.y = 5;
 windmillTowerGroup.add(walls);
 
 // Door
+const doorTexture = textureLoader.load("./door/color.jpg");
+const doorAlphaTexture = textureLoader.load("./door/alpha.jpg");
+const doorAmbientOcclusionTexture = textureLoader.load(
+  "./door/ambientOcclusion.jpg"
+);
+const doorHeightTexture = textureLoader.load("./door/height.jpg");
+const doorNormalTexture = textureLoader.load("./door/normal.jpg");
+const doorMetalnessTexture = textureLoader.load("./door/metalness.jpg");
+const doorRoughnessTexture = textureLoader.load("./door/roughness.jpg");
+
+doorTexture.colorSpace = THREE.SRGBColorSpace;
+
 const door = new THREE.Mesh(
-  new THREE.PlaneGeometry(2, 3),
-  new THREE.MeshStandardMaterial({ color: 0x654321 })
+  new THREE.PlaneGeometry(2.2, 2.2),
+  new THREE.MeshStandardMaterial({
+    map: doorTexture,
+    alphaMap: doorAlphaTexture,
+    transparent: true,
+    aoMap: doorAmbientOcclusionTexture,
+    displacementMap: doorHeightTexture,
+    normalMap: doorNormalTexture,
+    metalnessMap: doorMetalnessTexture,
+    roughnessMap: doorRoughnessTexture,
+  })
 );
 
 door.position.z = 3.01;
@@ -224,7 +245,7 @@ bladeGroup.add(windmillBladePole1, windmillBladePole2);
 const createLatice = (width, height, rows, cols, material) => {
   const latticeGroup = new THREE.Group();
 
-  // Horizontal Bars - from bottom edge to top edge
+  // Horizontal Bars
   for (let i = 0; i <= rows; i++) {
     const slat = new THREE.Mesh(
       new THREE.BoxGeometry(width, 0.05, 0.05),
@@ -234,7 +255,7 @@ const createLatice = (width, height, rows, cols, material) => {
     latticeGroup.add(slat);
   }
 
-  // Vertical Bars - from left edge to right edge
+  // Vertical Bars
   for (let i = 0; i <= cols; i++) {
     const slat = new THREE.Mesh(
       new THREE.BoxGeometry(0.05, height, 0.05),
@@ -251,7 +272,6 @@ const latticeMaterial = new THREE.MeshStandardMaterial({
   color: 0x8b4513,
 });
 
-// Position settings (relative to bladeGroup center)
 const armOffset = 2.75;
 const poleY = 0;
 const poleZ = 0.5;
@@ -259,7 +279,7 @@ const poleZ = 0.5;
 const cos45 = Math.cos(Math.PI / 4);
 const sin45 = Math.sin(Math.PI / 4);
 
-const perpOffset = 0.35; // perpendicular to arm direction
+const perpOffset = 0.35;
 
 // Lattice for upper-right arm (pole1)
 const lattice1 = createLatice(
@@ -324,8 +344,37 @@ lattice4.position.set(
 bladeGroup.add(lattice1, lattice2, lattice3, lattice4);
 
 // Bushes
+const bushColorTexture = textureLoader.load(
+  "./bush/leaves_forest_ground_1k/leaves_forest_ground_diff_1k.jpg"
+);
+const bushNormalTexture = textureLoader.load(
+  "./bush/leaves_forest_ground_1k/leaves_forest_ground_nor_gl_1k.jpg"
+);
+const bushARMTexture = textureLoader.load(
+  "./bush/leaves_forest_ground_1k/leaves_forest_ground_arm_1k.jpg"
+);
+
+bushColorTexture.colorSpace = THREE.SRGBColorSpace;
+
+bushColorTexture.repeat.set(3, 3);
+bushColorTexture.wrapS = THREE.RepeatWrapping;
+bushColorTexture.wrapT = THREE.RepeatWrapping;
+
+bushARMTexture.repeat.set(3, 3);
+bushARMTexture.wrapS = THREE.RepeatWrapping;
+bushARMTexture.wrapT = THREE.RepeatWrapping;
+
+bushNormalTexture.repeat.set(3, 3);
+bushNormalTexture.wrapS = THREE.RepeatWrapping;
+bushNormalTexture.wrapT = THREE.RepeatWrapping;
+
 const bushGeomtry = new THREE.SphereGeometry(1, 16, 16);
-const bushMaterial = new THREE.MeshStandardMaterial();
+const bushMaterial = new THREE.MeshStandardMaterial({
+  color: "#ccffcc",
+  map: bushColorTexture,
+  normalMap: bushNormalTexture,
+  aoMap: bushARMTexture,
+});
 
 const bush1 = new THREE.Mesh(bushGeomtry, bushMaterial);
 bush1.scale.setScalar(0.5);
@@ -364,12 +413,37 @@ const createTree = (x, z, trunkHeight, trunkRadius) => {
 
   trunk.position.y = trunkHeight / 2;
 
+  const fuzziness = Math.floor(Math.random() * 5) + 2;
+  const bushSize = trunkRadius * 3 + Math.random() * trunkRadius * 2;
+
+  const foliageGeometry = new THREE.IcosahedronGeometry(bushSize, fuzziness);
+
+  const positions = foliageGeometry.attributes.position;
+  const displacement = 0.15 + Math.random() * 0.25;
+  for (let i = 0; i < positions.count; i++) {
+    const x = positions.getX(i);
+    const y = positions.getY(i);
+    const z = positions.getZ(i);
+
+    const noise = 1 + (Math.random() - 0.5) * displacement;
+    positions.setXYZ(i, x * noise, y * noise, z * noise);
+  }
+
+  foliageGeometry.computeVertexNormals();
+
   const foliage = new THREE.Mesh(
-    new THREE.ConeGeometry(trunkRadius * 4, trunkHeight * 1.5, 8),
-    new THREE.MeshStandardMaterial({ color: 0x228b22 })
+    foliageGeometry,
+    new THREE.MeshStandardMaterial({
+      color: "#ccffcc",
+      map: bushColorTexture,
+      normalMap: bushNormalTexture,
+      aoMap: bushARMTexture,
+      flatShading: true,
+    })
   );
 
-  foliage.position.y = trunkHeight + (trunkHeight * 1.5) / 2 - 0.5;
+  foliage.scale.y = 0.7 + Math.random() * 0.3;
+  foliage.position.y = trunkHeight + bushSize * foliage.scale.y * 0.6;
 
   tree.add(trunk, foliage);
   tree.position.set(x, 0, z);
@@ -460,8 +534,30 @@ pathTrees.forEach((tree) => scene.add(tree));
 scatteredTrees.forEach((tree) => scene.add(tree));
 
 // graves
+const graveColorTexture = textureLoader.load(
+  "./grave/plastered_stone_wall_1k/plastered_stone_wall_diff_1k.jpg"
+);
+const graveARMTexture = textureLoader.load(
+  "./grave/plastered_stone_wall_1k/plastered_stone_wall_arm_1k.jpg"
+);
+const graveNormalTexture = textureLoader.load(
+  "./grave/plastered_stone_wall_1k/plastered_stone_wall_nor_1k.jpg"
+);
+
+graveColorTexture.colorSpace = THREE.SRGBColorSpace;
+
+graveColorTexture.repeat.set(0.3, 0.4);
+graveARMTexture.repeat.set(0.3, 0.4);
+graveNormalTexture.repeat.set(0.3, 0.4);
+
 const graveGeometry = new THREE.BoxGeometry(0.6, 0.8, 0.2);
-const graveMaterial = new THREE.MeshStandardMaterial();
+const graveMaterial = new THREE.MeshStandardMaterial({
+  map: graveColorTexture,
+  normalMap: graveNormalTexture,
+  aoMap: graveARMTexture,
+  roughnessMap: graveARMTexture,
+  metalnessMap: graveARMTexture,
+});
 
 const graves = new THREE.Group();
 
@@ -489,13 +585,18 @@ scene.add(graves);
  * Lights
  */
 // Ambient light
-const ambientLight = new THREE.AmbientLight("#ffffff", 0.5);
+const ambientLight = new THREE.AmbientLight("#86cdff", 0.275);
 scene.add(ambientLight);
 
 // Directional light
-const directionalLight = new THREE.DirectionalLight("#ffffff", 1.5);
+const directionalLight = new THREE.DirectionalLight("#86cdff", 1);
 directionalLight.position.set(3, 2, -8);
 scene.add(directionalLight);
+
+// Door Light
+const doorLight = new THREE.PointLight("#ff7d46", 1, 7);
+doorLight.position.set(0, 2.2, 3.5);
+windmillTowerGroup.add(doorLight);
 
 /**
  * Sizes
