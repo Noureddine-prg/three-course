@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { Sky } from "three/addons/objects/Sky.js";
 import { Timer } from "three/addons/misc/Timer.js";
 import GUI from "lil-gui";
 import { trunc } from "three/tsl";
@@ -24,18 +25,18 @@ const textureLoader = new THREE.TextureLoader();
 // Floor
 const floorAlphaTexture = textureLoader.load("./floor/alpha.jpg");
 const floorColorTexture = textureLoader.load(
-  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_diff_1k.jpg"
+  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_diff_1k.jpg",
 );
 const floorARMTexture = textureLoader.load(
-  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_arm_1k.jpg"
+  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_arm_1k.jpg",
 );
 
 const floorNormalTexture = textureLoader.load(
-  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_nor_gl_1k.jpg"
+  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_nor_gl_1k.jpg",
 );
 
 const floorDisplacementTexture = textureLoader.load(
-  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_disp_1k.jpg"
+  "./floor/coast_sand_rocks_02_1k/coast_sand_rocks_02_disp_1k.jpg",
 );
 
 floorColorTexture.colorSpace = THREE.SRGBColorSpace;
@@ -56,7 +57,9 @@ floorDisplacementTexture.repeat.set(40, 40);
 floorDisplacementTexture.wrapS = THREE.RepeatWrapping;
 floorDisplacementTexture.wrapT = THREE.RepeatWrapping;
 
-// Scene Floor Geometry
+/**
+ * Floor Mesh
+ */
 const floor = new THREE.Mesh(
   new THREE.PlaneGeometry(40, 40, 100, 100),
   new THREE.MeshStandardMaterial({
@@ -70,7 +73,7 @@ const floor = new THREE.Mesh(
     displacementMap: floorDisplacementTexture,
     displacementScale: 0.3,
     displacementBias: -0.2,
-  })
+  }),
 );
 
 // Windmill tower group
@@ -80,15 +83,17 @@ scene.add(windmillTowerGroup);
 floor.rotation.x = Math.PI * -0.5;
 scene.add(floor);
 
-// Walls
+/**
+ * Walls
+ */
 const wallColorTexture = textureLoader.load(
-  "./wall/castle_brick_broken_06_1k/castle_brick_broken_06_diff_1k.jpg"
+  "./wall/castle_brick_broken_06_1k/castle_brick_broken_06_diff_1k.jpg",
 );
 const wallARMTexture = textureLoader.load(
-  "./wall/castle_brick_broken_06_1k/castle_brick_broken_06_arm_1k.jpg"
+  "./wall/castle_brick_broken_06_1k/castle_brick_broken_06_arm_1k.jpg",
 );
 const wallNormalTexture = textureLoader.load(
-  "./wall/castle_brick_broken_06_1k/castle_brick_broken_06_nor_gl_1k.jpg"
+  "./wall/castle_brick_broken_06_1k/castle_brick_broken_06_nor_gl_1k.jpg",
 );
 
 wallColorTexture.colorSpace = THREE.SRGBColorSpace;
@@ -113,18 +118,20 @@ const walls = new THREE.Mesh(
     roughnessMap: wallARMTexture,
     metalnessMap: wallARMTexture,
     normalMap: wallNormalTexture,
-  })
+  }),
 );
 
 walls.position.y = 5;
 
 windmillTowerGroup.add(walls);
 
-// Door
+/**
+ * Door
+ */
 const doorTexture = textureLoader.load("./door/color.jpg");
 const doorAlphaTexture = textureLoader.load("./door/alpha.jpg");
 const doorAmbientOcclusionTexture = textureLoader.load(
-  "./door/ambientOcclusion.jpg"
+  "./door/ambientOcclusion.jpg",
 );
 const doorHeightTexture = textureLoader.load("./door/height.jpg");
 const doorNormalTexture = textureLoader.load("./door/normal.jpg");
@@ -144,7 +151,7 @@ const door = new THREE.Mesh(
     normalMap: doorNormalTexture,
     metalnessMap: doorMetalnessTexture,
     roughnessMap: doorRoughnessTexture,
-  })
+  }),
 );
 
 door.position.z = 3.01;
@@ -152,16 +159,18 @@ door.position.y = 1;
 
 windmillTowerGroup.add(door);
 
-// Roof
+/**
+ * Roof
+ */
 
 const roofColorTexture = textureLoader.load(
-  "./roof/roof_slates_02_1k/roof_slates_02_diff_1k.jpg"
+  "./roof/roof_slates_02_1k/roof_slates_02_diff_1k.jpg",
 );
 const roofARMTexture = textureLoader.load(
-  "./roof/roof_slates_02_1k/roof_slates_02_arm_1k.jpg"
+  "./roof/roof_slates_02_1k/roof_slates_02_arm_1k.jpg",
 );
 const roofNormalTexture = textureLoader.load(
-  "./roof/roof_slates_02_1k/roof_slates_02_nor_gl_1k.jpg"
+  "./roof/roof_slates_02_1k/roof_slates_02_nor_gl_1k.jpg",
 );
 
 roofColorTexture.colorSpace = THREE.SRGBColorSpace;
@@ -186,14 +195,16 @@ const roof = new THREE.Mesh(
     roughnessMap: roofARMTexture,
     metalnessMap: roofARMTexture,
     normalMap: roofNormalTexture,
-  })
+  }),
 );
 
 roof.position.y = 15;
 
 windmillTowerGroup.add(roof);
 
-// roof - indent
+/**
+ * Roof Indent
+ */
 const roofIndent = new THREE.Mesh(
   new THREE.BoxGeometry(2, 4, 2),
   new THREE.MeshStandardMaterial({
@@ -202,14 +213,16 @@ const roofIndent = new THREE.Mesh(
     roughnessMap: roofARMTexture,
     metalnessMap: roofARMTexture,
     normalMap: roofNormalTexture,
-  })
+  }),
 );
 roofIndent.position.z = 3;
 roofIndent.position.y = 12.01;
 
 windmillTowerGroup.add(roofIndent);
 
-// Windmill Blade Poles and blade
+/**
+ * Windmill Blade Poles and Blades
+ */
 
 const bladeGroup = new THREE.Group();
 bladeGroup.position.y = 12;
@@ -232,7 +245,7 @@ const windMillBlade = {
 
 const windmillBladePole1 = new THREE.Mesh(
   new THREE.BoxGeometry(0.3, 10, 0.5),
-  new THREE.MeshStandardMaterial({ color: windmillBladePoles.color })
+  new THREE.MeshStandardMaterial({ color: windmillBladePoles.color }),
 );
 windmillBladePole1.rotation.z = Math.PI / 4;
 
@@ -249,7 +262,7 @@ const createLatice = (width, height, rows, cols, material) => {
   for (let i = 0; i <= rows; i++) {
     const slat = new THREE.Mesh(
       new THREE.BoxGeometry(width, 0.05, 0.05),
-      material
+      material,
     );
     slat.position.y = (i / rows) * height - height / 2;
     latticeGroup.add(slat);
@@ -259,7 +272,7 @@ const createLatice = (width, height, rows, cols, material) => {
   for (let i = 0; i <= cols; i++) {
     const slat = new THREE.Mesh(
       new THREE.BoxGeometry(0.05, height, 0.05),
-      material
+      material,
     );
     slat.position.x = (i / cols) * width - width / 2;
     latticeGroup.add(slat);
@@ -287,13 +300,13 @@ const lattice1 = createLatice(
   windMillBlade.height,
   windMillBlade.rows,
   windMillBlade.cols,
-  latticeMaterial
+  latticeMaterial,
 );
 lattice1.rotation.z = -Math.PI / 4;
 lattice1.position.set(
   armOffset * cos45 + perpOffset * sin45,
   poleY + armOffset * sin45,
-  poleZ
+  poleZ,
 );
 
 // Lattice for lower-left arm (pole1)
@@ -302,13 +315,13 @@ const lattice2 = createLatice(
   windMillBlade.height,
   windMillBlade.rows,
   windMillBlade.cols,
-  latticeMaterial
+  latticeMaterial,
 );
 lattice2.rotation.z = -Math.PI / 4;
 lattice2.position.set(
   -armOffset * cos45 + perpOffset * sin45,
   poleY - armOffset * sin45,
-  poleZ
+  poleZ,
 );
 
 // Lattice for upper-left arm (pole2)
@@ -317,13 +330,13 @@ const lattice3 = createLatice(
   windMillBlade.height,
   windMillBlade.rows,
   windMillBlade.cols,
-  latticeMaterial
+  latticeMaterial,
 );
 lattice3.rotation.z = Math.PI / 4;
 lattice3.position.set(
   -armOffset * cos45 - perpOffset * sin45,
   poleY + armOffset * sin45,
-  poleZ
+  poleZ,
 );
 
 // Lattice for lower-right arm (pole2)
@@ -332,26 +345,28 @@ const lattice4 = createLatice(
   windMillBlade.height,
   windMillBlade.rows,
   windMillBlade.cols,
-  latticeMaterial
+  latticeMaterial,
 );
 lattice4.rotation.z = Math.PI / 4;
 lattice4.position.set(
   armOffset * cos45 - perpOffset * sin45,
   poleY - armOffset * sin45,
-  poleZ
+  poleZ,
 );
 
 bladeGroup.add(lattice1, lattice2, lattice3, lattice4);
 
-// Bushes
+/**
+ * Bushes
+ */
 const bushColorTexture = textureLoader.load(
-  "./bush/leaves_forest_ground_1k/leaves_forest_ground_diff_1k.jpg"
+  "./bush/leaves_forest_ground_1k/leaves_forest_ground_diff_1k.jpg",
 );
 const bushNormalTexture = textureLoader.load(
-  "./bush/leaves_forest_ground_1k/leaves_forest_ground_nor_gl_1k.jpg"
+  "./bush/leaves_forest_ground_1k/leaves_forest_ground_nor_gl_1k.jpg",
 );
 const bushARMTexture = textureLoader.load(
-  "./bush/leaves_forest_ground_1k/leaves_forest_ground_arm_1k.jpg"
+  "./bush/leaves_forest_ground_1k/leaves_forest_ground_arm_1k.jpg",
 );
 
 bushColorTexture.colorSpace = THREE.SRGBColorSpace;
@@ -402,13 +417,15 @@ bush6.position.set(-2, 0.1, 2.5);
 
 scene.add(bush1, bush2, bush3, bush4, bush5, bush6);
 
-// Trees
+/**
+ * Trees
+ */
+
 const createTree = (x, z, trunkHeight, trunkRadius) => {
   const tree = new THREE.Group();
-
   const trunk = new THREE.Mesh(
     new THREE.CylinderGeometry(trunkRadius * 0.7, trunkRadius, trunkHeight),
-    new THREE.MeshStandardMaterial({ color: 0x8b4513 })
+    new THREE.MeshStandardMaterial({ color: 0x8b4513 }),
   );
 
   trunk.position.y = trunkHeight / 2;
@@ -439,11 +456,14 @@ const createTree = (x, z, trunkHeight, trunkRadius) => {
       normalMap: bushNormalTexture,
       aoMap: bushARMTexture,
       flatShading: true,
-    })
+    }),
   );
 
   foliage.scale.y = 0.7 + Math.random() * 0.3;
   foliage.position.y = trunkHeight + bushSize * foliage.scale.y * 0.6;
+
+  trunk.castShadow = true;
+  foliage.castShadow = true;
 
   tree.add(trunk, foliage);
   tree.position.set(x, 0, z);
@@ -469,8 +489,8 @@ for (let z = pathStartZ; z <= pathEndZ; z += pathSpacing) {
       -pathSideOffset + xJitter,
       z + zJitter,
       heightVariation,
-      radiusVariation
-    )
+      radiusVariation,
+    ),
   );
   // Right side
   pathTrees.push(
@@ -478,12 +498,11 @@ for (let z = pathStartZ; z <= pathEndZ; z += pathSpacing) {
       pathSideOffset + xJitter,
       z + zJitter,
       heightVariation,
-      radiusVariation
-    )
+      radiusVariation,
+    ),
   );
 }
-
-// Scattered trees around the platform (avoiding path and windmill)
+// Scattered trees
 const scatteredTrees = [];
 const scatteredPositions = [
   // Back area (behind windmill)
@@ -492,41 +511,41 @@ const scatteredPositions = [
   { x: -15, z: -14 },
   { x: 10, z: -10 },
   { x: 14, z: -6 },
-  { x: 8, z: -16 },
-  { x: -5, z: -18 },
-  { x: 3, z: -14 },
-  { x: -10, z: -4 },
+  // { x: 8, z: -16 },
+  // { x: -5, z: -18 },
+  // { x: 3, z: -14 },
+  // { x: -10, z: -4 },
 
   // Left side (away from path)
   { x: -10, z: 8 },
   { x: -14, z: 12 },
   { x: -12, z: 4 },
   { x: -16, z: 16 },
-  { x: -8, z: 18 },
-  { x: -18, z: 8 },
+  // { x: -8, z: 18 },
+  // { x: -18, z: 8 },
 
   // Right side (away from path)
   { x: 10, z: 6 },
   { x: 14, z: 10 },
   { x: 12, z: 16 },
   { x: 16, z: 4 },
-  { x: 18, z: 14 },
-  { x: 8, z: 12 },
+  // { x: 18, z: 14 },
+  // { x: 8, z: 12 },
 
-  // Far corners
-  { x: -17, z: -17 },
-  { x: 17, z: -17 },
-  { x: -17, z: 17 },
-  { x: 17, z: 17 },
-  { x: -14, z: -10 },
-  { x: 15, z: -12 },
+  // // Far corners
+  // { x: -17, z: -17 },
+  // { x: 17, z: -17 },
+  // { x: -17, z: 17 },
+  // { x: 17, z: 17 },
+  // { x: -14, z: -10 },
+  // { x: 15, z: -12 },
 ];
 
 for (const pos of scatteredPositions) {
   const heightVariation = 2 + Math.random() * 2.5;
   const radiusVariation = 0.18 + Math.random() * 0.15;
   scatteredTrees.push(
-    createTree(pos.x, pos.z, heightVariation, radiusVariation)
+    createTree(pos.x, pos.z, heightVariation, radiusVariation),
   );
 }
 
@@ -535,13 +554,13 @@ scatteredTrees.forEach((tree) => scene.add(tree));
 
 // graves
 const graveColorTexture = textureLoader.load(
-  "./grave/plastered_stone_wall_1k/plastered_stone_wall_diff_1k.jpg"
+  "./grave/plastered_stone_wall_1k/plastered_stone_wall_diff_1k.jpg",
 );
 const graveARMTexture = textureLoader.load(
-  "./grave/plastered_stone_wall_1k/plastered_stone_wall_arm_1k.jpg"
+  "./grave/plastered_stone_wall_1k/plastered_stone_wall_arm_1k.jpg",
 );
 const graveNormalTexture = textureLoader.load(
-  "./grave/plastered_stone_wall_1k/plastered_stone_wall_nor_1k.jpg"
+  "./grave/plastered_stone_wall_1k/plastered_stone_wall_nor_1k.jpg",
 );
 
 graveColorTexture.colorSpace = THREE.SRGBColorSpace;
@@ -590,7 +609,7 @@ scene.add(ambientLight);
 
 // Directional light
 const directionalLight = new THREE.DirectionalLight("#86cdff", 1);
-directionalLight.position.set(3, 2, -8);
+directionalLight.position.set(3, 20, -8);
 scene.add(directionalLight);
 
 // Door Light
@@ -628,14 +647,16 @@ const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
   0.1,
-  100
+  100,
 );
 camera.position.x = 10;
 camera.position.y = 20;
 camera.position.z = 25;
 scene.add(camera);
 
-// Controls
+/**
+ * Controls
+ */
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 
@@ -647,6 +668,81 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+/**
+ * Shadows
+ */
+floor.receiveShadow = true;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+directionalLight.castShadow = true;
+walls.castShadow = true;
+roof.castShadow = true;
+roofIndent.castShadow = true;
+door.castShadow = true;
+windmillBladePole1.castShadow = true;
+windmillBladePole2.castShadow = true;
+
+[lattice1, lattice2, lattice3, lattice4].forEach((lattice) => {
+  lattice.traverse((child) => {
+    if (child.isMesh) {
+      child.castShadow = true;
+    }
+  });
+});
+
+bush1.castShadow = true;
+bush2.castShadow = true;
+bush3.castShadow = true;
+bush4.castShadow = true;
+bush5.castShadow = true;
+bush6.castShadow = true;
+
+[...pathTrees, ...scatteredTrees].forEach((tree) => {
+  tree.traverse((child) => {
+    if (child.isMesh) {
+      child.castShadow = true;
+    }
+  });
+});
+
+for (const grave of graves.children) {
+  grave.castShadow = true;
+  grave.receiveShadow = true;
+}
+
+/**
+ * Mapping
+ */
+directionalLight.shadow.mapSize.width = 1024;
+directionalLight.shadow.mapSize.height = 1024;
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 50;
+directionalLight.shadow.camera.left = -25;
+directionalLight.shadow.camera.right = 25;
+directionalLight.shadow.camera.top = 25;
+directionalLight.shadow.camera.bottom = -25;
+
+/**
+ * Sky
+ */
+
+const sky = new Sky();
+sky.scale.set(100, 100, 100);
+scene.add(sky);
+
+sky.material.uniforms["turbidity"].value = 10;
+sky.material.uniforms["rayleigh"].value = 2;
+sky.material.uniforms["mieCoefficient"].value = 0.005;
+sky.material.uniforms["mieDirectionalG"].value = 0.8;
+sky.material.uniforms["sunPosition"].value.set(0.3, -0.038, -0.95);
+
+/**
+ * Fpg
+ */
+
+scene.fog = new THREE.FogExp2("#02343f", 0.0025);
 
 /**
  * Animate
